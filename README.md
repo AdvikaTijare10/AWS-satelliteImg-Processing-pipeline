@@ -19,13 +19,13 @@ Images are uploaded directly from the frontend to Amazon S3 using pre-signed URL
 2. Event-Driven Processing Pipeline
 The system automatically triggers processing as soon as an image is uploaded to S3, enabling a fully automated and asynchronous workflow.
 
-4. Automated EC2 Lifecycle Management
+3. Automated EC2 Lifecycle Management
 An Amazon EC2 instance is dynamically started for image processing and stopped after completion, optimizing cost and resource utilization.
 
-6. Real-Time Dashboard for Processed Images
+4. Real-Time Dashboard for Processed Images
 Users can view processed images instantly through a dashboard powered by backend APIs, ensuring a seamless user experience.
 
-8. Metadata Storage and Retrieval
+5. Metadata Storage and Retrieval
 Image metadata (such as processed image URLs and timestamps) is stored in Amazon DynamoDB for fast and efficient access.
 
 # UI screenshots
@@ -37,24 +37,24 @@ Image metadata (such as processed image URLs and timestamps) is stored in Amazon
 1. Understanding Event-Driven Architecture
 Learned how to design a system where actions are automatically triggered (S3 upload → Lambda → EC2), reducing manual intervention and enabling asynchronous workflows.
 
-3. Working with Pre-signed URLs for Efficient Uploads
+2. Working with Pre-signed URLs for Efficient Uploads
 Understood how to upload files directly to Amazon S3 without routing them through the backend, improving performance and scalability.
 
-5. Integrating Multiple AWS Services
+3. Integrating Multiple AWS Services
 Gained hands-on experience connecting AWS Lambda, Amazon API Gateway, Amazon EC2, and Amazon DynamoDB into a complete working pipeline.
 
-7. Managing Compute Resources Efficiently
+4. Managing Compute Resources Efficiently
 Learned how to start and stop EC2 instances dynamically based on workload, helping optimize cloud costs and avoid unnecessary resource usage.
 
-9. Handling Data Storage and Retrieval
+5. Handling Data Storage and Retrieval
 Understood how to store and fetch metadata from DynamoDB, and realized the limitations of scan() vs query() for ordered and efficient data retrieval.
 
-11. Debugging Real-World Cloud Issues
+6. Debugging Real-World Cloud Issues
 Faced and resolved issues related to IAM permissions, service integration, and event triggers, improving problem-solving and debugging skills in a cloud environment.
 
 # Challenges Faced
 
-Multiple Lambda Triggers (Duplicate Processing)
+1.Multiple Lambda Triggers (Duplicate Processing)
 
 Problem:
 A single image upload triggered multiple Lambda executions, resulting in duplicate processed images.
