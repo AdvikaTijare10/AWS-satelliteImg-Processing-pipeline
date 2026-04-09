@@ -32,6 +32,106 @@ Image metadata (such as processed image URLs and timestamps) is stored in Amazon
 <img width="1884" height="725" alt="Image" src="https://github.com/user-attachments/assets/934c7fb9-ffdc-4026-bbd4-56893364004a" />
 
 # Setup Instructions
+
+##  Setup Instructions
+
+### 1. Create S3 Bucket
+
+- Go to AWS → Amazon S3
+- Create a bucket (e.g., satellite-images-pipeline)
+- Create folders:
+  - input/ (for uploads)
+  - processed/ (for output images)
+
+2. Configure S3 Event Trigger
+
+- Go to Bucket → Properties → Event notifications
+- Create event:
+  - Event type: Object Created
+  - Prefix: input/
+  - Destination: Lambda (processing trigger)
+
+3. Launch EC2 Instance
+
+- Go to Amazon EC2 → Launch Instance
+- OS: Amazon Linux
+- Instance type: t2.micro
+- Enable SSH (port 22)
+
+4. Configure EC2 IAM Role
+
+Attach the following policies:
+
+- AmazonSSMManagedInstanceCore
+- AmazonS3FullAccess
+- AmazonDynamoDBFullAccess
+
+5. Setup EC2 Environment
+
+- Install Python and required libraries
+- Place process_image.py script in EC2
+
+6. Create DynamoDB Table
+
+- Go to Amazon DynamoDB
+- Table name: ProcessedImagesData
+- Partition key: image_id (String)
+
+7. Create Lambda (Processing Trigger)
+
+- Go to AWS Lambda → Create function
+- Purpose: Start EC2 and execute processing script
+
+8. Configure Lambda IAM Role
+
+Attach the following policies:
+
+- AmazonEC2FullAccess
+- AmazonSSMFullAccess
+- AWSLambdaBasicExecutionRole
+
+9. Create Lambda (Upload URL)
+
+- Purpose: Generate pre-signed S3 upload URL
+- Permissions:
+  - AmazonS3FullAccess
+
+10. Create Lambda (Fetch Processed Data)
+
+- Purpose: Retrieve processed image metadata from DynamoDB
+- Permissions:
+  - AmazonDynamoDBFullAccess
+
+11. Setup API Gateway
+
+- Go to Amazon API Gateway
+- Create HTTP API
+
+Add routes:
+
+- GET /upload-url → Upload Lambda
+- GET /images → Fetch data Lambda
+
+12. Configure CORS
+
+API Gateway:
+- Allow origin: http://127.0.0.1:5500
+- Allow methods: GET, PUT, POST
+- Allow headers: *
+
+S3 Bucket:
+- Add CORS policy to allow PUT and GET from frontend origin
+
+13. Test the Pipeline
+
+- Upload image via UI or S3
+
+Flow:
+
+Frontend → API Gateway → S3 (input/)
+→ Lambda trigger → EC2 → Processing
+→ S3 (processed/) → DynamoDB → API → Dashboard
+
 # Key Learnings
 
 ### 1.Understanding Event-Driven Architecture
