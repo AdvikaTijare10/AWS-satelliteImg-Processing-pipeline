@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Satellite Dashboard</title>
+
+```
+<style>
+    body {
+        font-family: Arial;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+        text-align: center;
+    }
+
+    h1 {
+        margin: 20px;
+    }
+
+    .upload-box {
+        margin: 20px;
+    }
+
+    input, button {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 8px;
+        border: none;
+    }
+
+    button {
+        background: #22c55e;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #16a34a;
+    }
+
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .card {
+        background: #1e293b;
+        margin: 15px;
+        padding: 15px;
+        border-radius: 12px;
+        width: 340px;
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: scale(1.03);
+    }
+
+    img {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .images {
+        display: flex;
+        gap: 10px;
+    }
+
+    .images img {
+        width: 48%;
+    }
+
+    .label {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .status {
+        color: yellow;
+        font-size: 14px;
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+<h1>Dashboard</h1>
+
+<div class="upload-box">
+    <input type="file" id="fileInput">
+    <button onclick="uploadImage()">Upload</button>
+</div>
+
+<div class="container" id="container"></div>
+
+<script>
+
+const API_URL = "get-rpocessed-image-url";
+const UPLOAD_URL_API = "get-upload-url";
+const BUCKET = "satellite-images-pipeline-100412";
+
+//  Load data
+function loadData() {
+    fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+
+        if (!Array.isArray(data)) {
+            data = JSON.parse(data.body);
+        }
+
+        const container = document.getElementById("container");
+        container.innerHTML = "";
+
+        data.reverse().forEach(item => {
+
+            const div = document.createElement("div");
+            div.className = "card";
+
+            const inputUrl = `https://${BUCKET}.s3.amazonaws.com/${item.input_key}`;
+            const outputUrl = `https://${BUCKET}.s3.amazonaws.com/${item.output_key}`;
+
+            div.innerHTML = `
+                <h3>${item.image_id}</h3>
+                <p class="label">${new Date(parseInt(item.timestamp)*1000).toLocaleString()}</p>
+
+                <div class="images">
+                    <div>
+                        <p class="label">Original</p>
+                        <img src="${inputUrl}">
+                    </div>
+                    <div>
+                        <p class="label">Processed</p>
+                        <img src="${outputUrl}">
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+    });
+}
+
+
+//  Upload with LIVE preview + processing state
+async function uploadImage() {
+
+    const file = document.getElementById("fileInput").files[0];
+
+    if (!file) {
+        alert("Select a file first");
+        return;
+    }
+
+    const container = document.getElementById("container");
+
+    // 🔥 Show processing card instantly
+    const tempCard = document.createElement("div");
+    tempCard.className = "card";
+
+    const preview = URL.createObjectURL(file);
+
+    tempCard.innerHTML = `
+        <h3>Uploading...</h3>
+        <p class="status">Processing ⏳</p>
+        <img src="${preview}">
+    `;
+
+    container.prepend(tempCard);
+
+    try {
+        // Step 1: get presigned URL
+        const res = await fetch(UPLOAD_URL_API);
+        const data = await res.json();
+
+        // Step 2: upload to S3
+        await fetch(data.upload_url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": file.type
+            },
+            body: file
+        });
+
+        tempCard.innerHTML = `
+            <h3>Uploaded ✅</h3>
+            <p class="status">Processing... wait ⏳</p>
+            <img src="${preview}">
+        `;
+
+        // Step 3: reload after some time
+        setTimeout(loadData, 7000);
+
+    } catch (err) {
+        tempCard.innerHTML = `
+            <h3>Error ❌</h3>
+            <p>${err}</p>
+        `;
+    }
+}
+
+
+// auto load
+loadData();
+setInterval(loadData, 10000);
+
+</script>
+
+</body>
+</html>
