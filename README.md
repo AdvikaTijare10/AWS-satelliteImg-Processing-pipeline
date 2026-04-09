@@ -2,7 +2,7 @@
 A scalable AWS-based , event-driven image processing system that processes uploaded images using s3 triggers, Lambda functions and EC2 and displays results through a real-time dashboard.
 # Architecure Diagram / Workflow
 
-<img width="633" height="754" alt="Image" src="https://github.com/user-attachments/assets/57a754f5-f9a6-4459-b0a6-906e6f9c84f2" />
+[aws_pipeline_flowchart.html](https://github.com/user-attachments/files/26589826/aws_pipeline_flowchart.html)
 
 # AWS Services Used-
 1. AWS Lambda
